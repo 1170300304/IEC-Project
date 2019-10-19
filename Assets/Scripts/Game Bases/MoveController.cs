@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using Valve.VR;
+//using Valve.VR;
 
 public class MoveController : MonoBehaviour
 {
@@ -8,12 +8,10 @@ public class MoveController : MonoBehaviour
         get;
         private set;
     }
-    public bool SendAc = true;
-    public bool SendT = true;
 
-    public SteamVR_Input_Sources handType;
-    public SteamVR_Action_Vector2 PadPos;
-    public SteamVR_Action_Boolean pressPad;
+    //public SteamVR_Input_Sources handType;
+    //public SteamVR_Action_Vector2 PadPos;
+    //public SteamVR_Action_Boolean pressPad;
 
     public Vector3 EyePosition => mover.EyeTransform.position;
     public Vector3 EyeEulerAngles => mover.EyeTransform.eulerAngles;
@@ -59,7 +57,11 @@ public class MoveController : MonoBehaviour
             DataSync.SyncTransform(unit, instant, unit.transform.position, unit.transform.rotation, rb.velocity.magnitude);
         }
     }
+    [SerializeField]
+    long instant;
+    [SerializeField]
     long lastSyncA;
+    [SerializeField]
     long lastSyncT;
     private void Update()
     {
@@ -68,36 +70,42 @@ public class MoveController : MonoBehaviour
 
         float h, v;
         Vector3 camFwd;
-        if (GameCtrl.IsVR)
+        //if (GameCtrl.IsVR)
+        //{
+        //    if (GetPressPad())
+        //    {
+        //        Vector2 pos = PadPos.GetAxis(handType);
+        //        h = Mathf.Clamp(pos.x * 5f, -1f, 1f);
+        //        v = Mathf.Clamp(pos.y * 5f, -1f, 1f);
+        //    }
+        //    else
+        //    {
+        //        h = 0f;
+        //        v = 0f;
+        //    }
+        //    camFwd = CameraGroupController.Instance.transform.forward;
+        //}
+        //else
+        //{
+        if (GameCtrl.CursorOnGUI)
         {
-            if (GetPressPad())
-            {
-                Vector2 pos = PadPos.GetAxis(handType);
-                h = Mathf.Clamp(pos.x * 5f, -1f, 1f);
-                v = Mathf.Clamp(pos.y * 5f, -1f, 1f);
-            }
-            else
-            {
-                h = 0f;
-                v = 0f;
-            }
-            camFwd = CameraGroupController.Instance.transform.forward;
+            h = 0;
+            v = 0;
         }
         else
         {
             h = InputMgr.GetHorizontalAxis();
             v = InputMgr.GetVerticalAxis();
-            camFwd = CameraGroupController.Instance.transform.forward;
         }
-
+        camFwd = CameraGroupController.Instance.transform.forward;
+        //}
         mover.V = v;
         mover.H = h;
         mover.CameraForward = camFwd;
-
         if (GameCtrl.IsOnlineGame)
         {
             Unit unit = GameCtrl.PlayerUnit;
-            long instant = Gamef.SystemTimeInMillisecond;
+            instant = Gamef.SystemTimeInMillisecond;
             if (instant - lastSyncA >= 33)
             {
                 if (instant - lastSyncA <= 40)
@@ -108,8 +116,7 @@ public class MoveController : MonoBehaviour
                 {
                     lastSyncA = instant;
                 }
-                if (SendAc)
-                    DataSync.SyncMobileControlAxes(unit, instant, Mathf.RoundToInt(h), Mathf.RoundToInt(v), CameraGroupController.Instance.transform.forward);
+                DataSync.SyncMobileControlAxes(unit, instant, Mathf.RoundToInt(h), Mathf.RoundToInt(v), CameraGroupController.Instance.transform.forward);
             }
             if (instant - lastSyncT >= 300)
             {
@@ -121,15 +128,13 @@ public class MoveController : MonoBehaviour
                 {
                     lastSyncT = instant;
                 }
-                Debug.Log("Send sync transform");
-                if (SendT)
-                    DataSync.SyncTransform(unit, instant, unit.transform.position, unit.transform.rotation, rb.velocity.magnitude);
+                DataSync.SyncTransform(unit, instant, unit.transform.position, unit.transform.rotation, rb.velocity.magnitude);
             }
         }
     }
 
-    bool GetPressPad()
-    {
-        return pressPad.GetState(handType);
-    }
+    //bool GetPressPad()
+    //{
+    //    return pressPad.GetState(handType);
+    //}
 }

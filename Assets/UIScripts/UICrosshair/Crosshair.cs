@@ -4,27 +4,88 @@ using UnityEditor;
 
 public class Crosshair : MonoBehaviour
 {
+    public static Crosshair Instance { get; private set; }
     public float height = 10f;
     public float width = 2f;
     public float defaultSpread = 10f;
     public Color color = Color.grey;
-    public bool resizeable = false;
+    public bool resizeable = true;
     public float resizedSpread = 20f;
     public float resizeSpeed = 3f;
+    public float distantConst = 20f;
+    [Header("Animation Settings")]
+    public AnimationClip fadeInClip;
+    public AnimationClip fadeOutClip;
+    public Animation Anim;
 
     float spread;
-    bool resizing = false;
+    bool resizing = true;
 
     void Awake()
     {
+        Instance = this;
         //set spread
         spread = defaultSpread;
+        resizedSpread = defaultSpread;
+    }
+
+    //public void Pause()
+    //{
+    //    enableDrawing = false;
+    //}
+
+    //public void Resume()
+    //{
+    //    enableDrawing = true;
+    //}
+    bool isEnabled = false;
+    private readonly object stateMutex = new object();
+    /// <summary>
+    /// 设定准心显示状态。
+    /// </summary>
+    /// <param name="flag">True，显示；False，隐藏</param>
+    public static void SetState(bool flag)
+    {
+        lock (Instance.stateMutex)
+        {
+            if (flag && !Instance.isEnabled)
+            {
+                // enable
+                Instance.Anim.clip = Instance.fadeInClip;
+                Instance.color.a = 0.7f;
+                Instance.Anim.Play();
+                Instance.isEnabled = true;
+            }
+            else if(!flag && Instance.isEnabled)
+            {
+                // disable
+                Instance.Anim.clip = Instance.fadeOutClip;
+                Instance.color.a = 0f;
+                Instance.Anim.Play();
+                Instance.isEnabled = false;
+            }
+        }
+    }
+
+    public void SetDefaultAccuracy(float accuracy)
+    {
+        float angle = 100 - accuracy;
+        float spread = distantConst * Mathf.Tan(angle * Mathf.Deg2Rad);
+        defaultSpread = spread;
+    }
+
+    public void SetAccuracy(float accuracy)
+    {
+        float angle = 100 - accuracy;
+        float spread = distantConst * Mathf.Tan(angle * Mathf.Deg2Rad) + defaultSpread;
+        resizedSpread = spread;
     }
 
     void Update()
     {
         //for demonstration purposes
-        if (Input.GetMouseButton(0)) { resizing = true; } else { resizing = false; }
+        //if (Input.GetMouseButton(0)) { resizing = true; } else { resizing = false; }
+        
         if (resizeable)
         {
             if (resizing)
@@ -39,7 +100,7 @@ public class Crosshair : MonoBehaviour
             }
 
             //clamp spread
-            spread = Mathf.Clamp(spread, defaultSpread, resizedSpread);
+            //spread = Mathf.Clamp(spread, defaultSpread, resizedSpread);
         }
     }
 

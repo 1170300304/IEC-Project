@@ -123,6 +123,7 @@ public class SkillCell : ISkillCell
         {
             return;
         }
+        Debug.Log(string.Format("ID {0}: is casting now at {1}", caster.attributes.ID, Gamef.SystemTimeInMillisecond));
         // 考虑延迟，当施法时，计时器的值应为 当前值 + deltaT
         if (timer + deltaT > 1e-5f)
         {
@@ -132,7 +133,7 @@ public class SkillCell : ISkillCell
         {
             return;
         }
-        Debug.Log(string.Format("ID {0} skillcell start", caster.attributes.ID));
+        Debug.Log(string.Format("ID {0} skill cell start at {1}", caster.attributes.ID, Gamef.SystemTimeInMillisecond));
         if (skill is ISkillCastInstant tmp)
         {
             tmp.SetInstant(startOrStopInstant);
@@ -236,20 +237,20 @@ public class SkillCell : ISkillCell
                 }
             }
             // 精确度恢复
-            switch (skill.Data.SkillType)
-            {
-                case SkillType.StrafeSkill:
-                    asskill.AccuracyCooldown(Time.deltaTime);
-                    break;
-                case SkillType.BurstfireSkill:
-                    abskill.AccuracyCooldown(Time.deltaTime);
-                    break;
-                case SkillType.ContinuousSkill:
-                    // do nothing
-                    break;
-                default:
-                    break;
-            }
+            //switch (skill.Data.SkillType)
+            //{
+            //    case SkillType.StrafeSkill:
+            //        asskill.AccuracyCooldown(Time.deltaTime);
+            //        break;
+            //    case SkillType.BurstfireSkill:
+            //        abskill.AccuracyCooldown(Time.deltaTime);
+            //        break;
+            //    case SkillType.ContinuousSkill:
+            //        // do nothing
+            //        break;
+            //    default:
+            //        break;
+            //}
 
         }
         // 如果技能正在施法

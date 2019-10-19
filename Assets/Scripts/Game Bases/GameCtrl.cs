@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Valve.VR;
+//using Valve.VR;
 
 public partial class GameCtrl : MonoBehaviour
 {
@@ -18,6 +18,10 @@ public partial class GameCtrl : MonoBehaviour
     #endregion
 
     #region 实时公有信息
+    public LogoPanel logoPanel;
+    public LoadingPanel loadingPanel;
+    public static bool CursorOnGUI = false;
+
     //private UnitInfo _mainChara;
     private static Unit _playerUnit = null;
     public static EventPublisher<Unit> PlayerUnitChangeEvent = new EventPublisher<Unit>();
@@ -40,9 +44,9 @@ public partial class GameCtrl : MonoBehaviour
         }
     }
     public static bool IsOnlineGame = false;
-    public static bool IsVR = true;
-    public bool Is_VR = true;
-    public bool Is_Online_Game = false;
+    //public static bool IsVR = true;
+    //public bool Is_VR = true;
+    //public bool Is_Online_Game = false;
 
     public Transform PlayerCamera
     {
@@ -50,15 +54,13 @@ public partial class GameCtrl : MonoBehaviour
     }
     #endregion
 
-    public SteamVR_Action_Vibration hapticSignal;
-    public bool check = false;
-    public string gameScene;
-
+    //public SteamVR_Action_Vibration hapticSignal;
     public void StartSingleGame()
     {
-        if (check)
-            SceneManager.LoadSceneAsync(gameScene);
+        StartLoadingGameScene();
     }
+
+
 
     /// <summary>
     /// 延迟执行动作。
@@ -80,14 +82,8 @@ public partial class GameCtrl : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        IsOnlineGame = Is_Online_Game;
-        IsVR = Is_VR;
         EventMgr.initEvent.OnAwake();
         EventMgr.UpdateEvent.AddListener(InputMgr.CheckHotKey);
-        //InputMgr.BindHotKey(TestHotKey, KeyCode.F);
-        //InputMgr.BindHotKey(TestCasting, KeyCode.T);
-
-        //BindHotKey4Skill();
     }
 
     private void Start()
@@ -118,6 +114,7 @@ public partial class GameCtrl : MonoBehaviour
         EventMgr.UpdateEvent.OnTrigger();
 
         UpdateMP_HP_UI();
+        UpdateCrosshair();
     }
 
     void UpdateMP_HP_UI()
@@ -130,6 +127,14 @@ public partial class GameCtrl : MonoBehaviour
         }
     }
 
+    void UpdateCrosshair()
+    {
+        if (PlayerUnit != null)
+        {
+            if (PlayerUnit.RuntimeAccuracy > 9.99f)
+                Crosshair.Instance.SetAccuracy(PlayerUnit.RuntimeAccuracy);
+        }
+    }
     #endregion
 
     private void Build()

@@ -105,12 +105,21 @@ public class CameraGroupController : MonoBehaviour
         {
             return;
         }
-        UpdateCameraRotation(Time.fixedDeltaTime);
-        SetAngleAroundZAxis(Time.fixedDeltaTime);
+        if (GameCtrl.CursorOnGUI)
+            return;
+        if (lockCursor && GameCtrl.PlayerUnit.attributes.isAlive)
+        {
+            UpdateCameraRotation(Time.fixedDeltaTime);
+            SetAngleAroundZAxis(Time.fixedDeltaTime);
+        }
     }
 
     public void ResetTransform(Vector3 position, Quaternion rotation)
     {
+        if (PositionParent == null)
+        {
+            Debug.LogError("Position Parent is NULL");
+        }
         PositionParent.position = position;
         PositionParent.rotation = Quaternion.identity;
         RotationParent.localRotation = rotation;
@@ -245,6 +254,8 @@ public class CameraGroupController : MonoBehaviour
                     Debug.Log("???");
                     it.Reset();
                     tmp = it.Current;
+                    if (tmp == null)
+                        return null;
                 }
                 float angle = Vector3.Angle(fwd, tmp.transform.position - pos);
                 if (angle < minAngle)
